@@ -74,6 +74,74 @@ glog20() {
 gdiff() { git diff --cached; }
 gundo() { git reset --soft HEAD~1; }
 
+function path::list() {
+  print -l ${(s/:/)PATH}
+}
+
+alias -- PATH=path::list
+function PATH() { path::list; }
+
+function path::remove() {
+  local -a result parts
+  IFS=':' parts=(${(s/:/)PATH})
+  result=()
+
+  for part in "${parts[@]}"; do
+    skip=false
+    for pattern in "$@"; do
+      [[ "$part" =~ ${~pattern} ]] && skip=true
+    done
+    $skip || result+=("$part")
+  done
+
+  PATH="${(j/:/)result}"
+}
+
+alias -- -PATH=path::remove
+alias -- PATH-=path::remove
+alias -- -P=path::remove
+alias -- P-=path::remove
+
+function path::append() {
+  path::remove "$@"
+  for arg in "$@"; do
+    [[ -d "$arg" && ":$PATH:" != *":$arg:"* ]] && PATH+="${PATH:+:}$arg"
+  done
+}
+
+alias -- PATH+=path::append
+alias -- P+=path::append
+
+function path::prepend() {
+  path::remove "$@"
+  for arg in "$@"; do
+    [[ -d "$arg" && ":$PATH:" != *":$arg:"* ]] && PATH="$arg${PATH:+:$PATH}"
+  done
+}
+
+alias -- +PATH=path::prepend
+alias -- +P=path::prepend
+
+function path::dedupe() {
+  local -a _path new_path
+  local seen
+  typeset -A seen
+
+  # Split PATH into array using ':' as delimiter
+  IFS=':' _path=(${(s/:/)PATH})
+
+  # Deduplicate, preserving order
+  for dir in "${_path[@]}"; do
+    if [[ -n "$dir" && -z "${seen[$dir]}" ]]; then
+      seen[$dir]=1
+      new_path+="$dir"
+    fi
+  done
+
+  PATH="${(j/:/)new_path}"
+}
+
+
 # Backup
 alias backup-zshrc='cp ~/.zshrc ~/.zshrc.backup && echo ".zshrc backed up!"'
 
