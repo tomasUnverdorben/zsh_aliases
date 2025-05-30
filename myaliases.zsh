@@ -1,3 +1,6 @@
+# Set Windows USERPROFILE for WSL
+export USERPROFILE='C:\\Users\\'"$USER"
+
 # Existing Aliases and Custom Commands
 alias aliases="nano ~/.oh-my-zsh/custom/myaliases.zsh"
 alias cotuzeremisto="du -ckhs ./* | sort -h"
@@ -17,7 +20,7 @@ alias code="code ."
 alias cdga='cd $(/usr/bin/wslpath '\''C:\GitLab\ansible-playbooks'\'')'
 alias cdg='cd $(/usr/bin/wslpath '\''C:\GitLab'\'')'
 alias cdp='cd $(/usr/bin/wslpath '\''C:\Projects'\'')'
-alias cdd='cd $(/usr/bin/wslpath '\''C:\Users\uzitunverd\Downloads'\'')'
+alias cdd='cd "$(wslpath "$USERPROFILE\\Downloads")"'
 alias c='clear && ls'
 
 # Git Shortcuts
